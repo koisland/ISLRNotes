@@ -1,5 +1,5 @@
 renv/
 .Rproj.user/
 .Rhistory
-.Rdata
+.RData
 *.html
