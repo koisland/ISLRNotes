@@ -1,0 +1,11 @@
+---
+title: "Chapter 13: Multiple Testing"
+output: html_document
+---
+
+```{r include=FALSE}
+library(tidyverse)
+```
+The code below describes chapter 13 of *An Introduction to statistical learning with applications in R*, *Multiple Testing*.
+
+# 13.1: A Quick Review of Hypothesis Testing
