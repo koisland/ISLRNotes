@@ -8,4 +8,81 @@ library(tidyverse)
 ```
 The code below describes chapter 13 of *An Introduction to statistical learning with applications in R*, *Multiple Testing*.
 
-# 13.1: A Quick Review of Hypothesis Testing
+## 13.1: A Quick Review of Hypothesis Testing
+Hypothesis testing provides a rigorous statistical framework for answering "yes-or-no" questions about data.
+* Ex. Is there a difference in the mean blood pressure of lab mic in the control vs. the treatment group?
+
+### 13.1.1 Testing a Hypothesis
+1. Define null and alternative hypotheses.
+2. Construct a test statistic that summarizes the strength of evidence *against the null hypothesis*.
+3. Compute a p-value that quantifies the probability of having obtained *a comparable or more extreme value of the test statistic under the null hypothesis.*
+3. Based on the p-value, we decide to reject the null hypothesis.
+
+#### Define the Null and Alternate Hypotheses
+Two possibilities:
+
+* Null ($H_o$)
+  * The default state of belief about the world.
+* Alternate ($H_a$)
+  * Something different and unexpected
+  * Suggests that the null hypothesis does not hold.
+
+#### Construct the Test Statistic
+A test statistic summaries the extent to which our data are consistent with $H_o$.
+
+**Example: Mice Blood Pressure**
+
+* $n_t$ treatment mice
+* $n_c$ control mice
+* $x$ denotes the blood pressure measurements.
+  * Treatment: $x_1^t, ... x^t_{n_t}$
+  * Control: $x_1^c, ... x^c_{n_c}$
+
+Calculate a **two-sample t-statistic** to test $H_o$ where the average blood pressure of both groups are equivalent.
+
+<center>
+$T = \frac{\hat{\mu}_t - \hat{\mu}_c}{s \sqrt{\frac{1}{n_t} + \frac{1}{n_c}}}$
+</center>
+
+* $\hat{\mu}_t/\hat{\mu}_c$$ Are the averages of the blood pressure measurements for both groups.
+* $s$ is an estimator of the pooled standarad deviation of the two sample groups.
+
+**A large (absolute) value of $T$ provides evidence against the null hypothesis.**
+
+#### Compute the p-value
+Next we need to determine how much evidence against $H_o$ is provided by a large test statistic.
+
+**A p-value is the probability of observing a test statistic equal to or more extreme than than the observed statistic under the assumption that the $H_o$ is true.**
+
+  * A small p-value provides evidence against $H_o$.
+
+**Example: $T = 2.33$**
+
+* Under $H_o$, distribution follows $N(0,1)$ distribution.
+  * A normal distribution with mean of 0 and variance of 1.
+  * Majority (98%) of $T$ values fall between $-2.33$ and $2.33$.
+  * Expect to see our result only 2% of the time.
+
+Null distribution depends on:
+
+* Type of $H_o$ being tested.
+* Type of test statistic is used.
+
+Most commonly-used test stats follow a well-known statistical distribution under $H_o$.
+
+**Interpretation**
+
+Often incorrectly interpreted. The CORRECT interpretation is:
+
+> Given that the $H_o$ is true, the p-value is the chance we'd see this value of the test statistic or something more extreme if the test was repeated many times.
+
+Converting the test statistic (An arbitrary and uninterpretable number) into a **p-value** (an easy-to-understand value between 0 and 1) **helps researchers interpret a result**.
+
+* Additional context given by p-value as we now what should be expected under $H_o$ null distribution.
+
+#### Decide Whether to Reject the Null Hypothesis
+Typically, some arbitary threshold of $<0.05$.
+
+Should never blindly adhere to a value. Also, include p-value in reporting.
+
+### 13.1.2 Type I and Type II Errors
