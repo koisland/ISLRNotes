@@ -1,6 +1,11 @@
 ---
 title: "Chapter 13: Multiple Testing"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    theme: united
+    toc_float: true
 ---
 
 ```{r include=FALSE}
@@ -10,7 +15,8 @@ The code below describes chapter 13 of *An Introduction to statistical learning 
 
 ## 13.1: A Quick Review of Hypothesis Testing
 Hypothesis testing provides a rigorous statistical framework for answering "yes-or-no" questions about data.
-* Ex. Is there a difference in the mean blood pressure of lab mic in the control vs. the treatment group?
+
+* Ex. Is there a difference in the mean blood pressure of lab mice in the control vs. the treatment group?
 
 ### 13.1.1 Testing a Hypothesis
 1. Define null and alternative hypotheses.
@@ -47,12 +53,12 @@ $T = \frac{\hat{\mu}_t - \hat{\mu}_c}{s \sqrt{\frac{1}{n_t} + \frac{1}{n_c}}}$
 * $\hat{\mu}_t/\hat{\mu}_c$$ Are the averages of the blood pressure measurements for both groups.
 * $s$ is an estimator of the pooled standarad deviation of the two sample groups.
 
-**A large (absolute) value of $T$ provides evidence against the null hypothesis.**
+> A large (absolute) value of $T$ provides evidence against the null hypothesis.
 
 #### Compute the p-value
 Next we need to determine how much evidence against $H_o$ is provided by a large test statistic.
 
-**A p-value is the probability of observing a test statistic equal to or more extreme than than the observed statistic under the assumption that the $H_o$ is true.**
+> A p-value is the probability of observing a test statistic equal to or more extreme than than the observed statistic under the assumption that the $H_o$ is true.
 
   * A small p-value provides evidence against $H_o$.
 
@@ -70,7 +76,7 @@ Null distribution depends on:
 
 Most commonly-used test stats follow a well-known statistical distribution under $H_o$.
 
-**Interpretation**
+#### Interpretation
 
 Often incorrectly interpreted. The CORRECT interpretation is:
 
@@ -81,8 +87,48 @@ Converting the test statistic (An arbitrary and uninterpretable number) into a *
 * Additional context given by p-value as we now what should be expected under $H_o$ null distribution.
 
 #### Decide Whether to Reject the Null Hypothesis
-Typically, some arbitary threshold of $<0.05$.
+Typically, some arbitrary threshold of $<0.05$.
 
 Should never blindly adhere to a value. Also, include p-value in reporting.
 
 ### 13.1.2 Type I and Type II Errors
+If the $H_o$ holds, it is a true null hypothesis. Otherwise it's a false null hypothesis.
+
+| Decision | Outcome if $H_o$ is true | Outcome if $H_a$ is true |
+| --- | --- | --- |
+| Reject $H_o$ | **Type I Error** | Correct |
+| Do Not Reject $H_o$ | Correct | **Type II Error** |
+
+#### Type 1 Error
+
+* Rate of error is the probability of incorrectly rejecting $H_o$.
+* Also called FPR.
+
+> Considered worst type of error as declare finding that is not correct.
+
+#### Type 2 Error
+
+* Rate of error is the probability of incorrectly not rejecting $H_o$.
+* Also called FNR.
+
+> Its **inverse (1 - FNR)** is  defined as the **power of a hypothesis test**. Correctly reject $H_o$ given $H_a$ holds.
+
+#### Trade-Offs
+
+* Make Type I error small:
+  * By:
+    * Reject $H_o$ if we are quite sure that it doesn't hold.
+  * Downside:
+    * Increase in Type II error.
+* Make Type II error small:
+  * By:
+    * Reject $H_o$ with even modest amount of evidence.
+  * Downside:
+    * Increase in Type I error.
+
+
+There is a direct correspondence between the p-value threshold that causes us to reject $H_o$ and the Type I error rate.
+
+> By only rejecting $H_o$ when the p-value is below $\alpha$, ensure that Type I error rate will be less than or equal to $\alpha$.
+
+## 13.2 the Challenge of Multiple Testing

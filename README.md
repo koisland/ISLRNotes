@@ -16,3 +16,6 @@ install.packages("renv")
 renv::init()
 renv::restore()
 ```
+
+### TODO:
+* [ ] Build GHA workflow after complete and deploy on GH Pages.
