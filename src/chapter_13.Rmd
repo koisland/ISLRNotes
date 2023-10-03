@@ -11,68 +11,72 @@ output:
 ```{r include=FALSE}
 library(tidyverse)
 ```
+
 The code below describes chapter 13 of *An Introduction to statistical learning with applications in R*, *Multiple Testing*.
 
 ## 13.1: A Quick Review of Hypothesis Testing
+
 Hypothesis testing provides a rigorous statistical framework for answering "yes-or-no" questions about data.
 
-* Ex. Is there a difference in the mean blood pressure of lab mice in the control vs. the treatment group?
+-   Ex. Is there a difference in the mean blood pressure of lab mice in the control vs. the treatment group?
 
 ### 13.1.1 Testing a Hypothesis
-1. Define null and alternative hypotheses.
-2. Construct a test statistic that summarizes the strength of evidence *against the null hypothesis*.
-3. Compute a p-value that quantifies the probability of having obtained *a comparable or more extreme value of the test statistic under the null hypothesis.*
-3. Based on the p-value, we decide to reject the null hypothesis.
+
+1.  Define null and alternative hypotheses.
+2.  Construct a test statistic that summarizes the strength of evidence *against the null hypothesis*.
+3.  Compute a p-value that quantifies the probability of having obtained *a comparable or more extreme value of the test statistic under the null hypothesis.*
+4.  Based on the p-value, we decide to reject the null hypothesis.
 
 #### Define the Null and Alternate Hypotheses
+
 Two possibilities:
 
-* Null ($H_o$)
-  * The default state of belief about the world.
-* Alternate ($H_a$)
-  * Something different and unexpected
-  * Suggests that the null hypothesis does not hold.
+-   Null ($H_o$)
+    -   The default state of belief about the world.
+-   Alternate ($H_a$)
+    -   Something different and unexpected
+    -   Suggests that the null hypothesis does not hold.
 
 #### Construct the Test Statistic
+
 A test statistic summaries the extent to which our data are consistent with $H_o$.
 
 **Example: Mice Blood Pressure**
 
-* $n_t$ treatment mice
-* $n_c$ control mice
-* $x$ denotes the blood pressure measurements.
-  * Treatment: $x_1^t, ... x^t_{n_t}$
-  * Control: $x_1^c, ... x^c_{n_c}$
+-   $n_t$ treatment mice
+-   $n_c$ control mice
+-   $x$ denotes the blood pressure measurements.
+    -   Treatment: $x_1^t, ... x^t_{n_t}$
+    -   Control: $x_1^c, ... x^c_{n_c}$
 
 Calculate a **two-sample t-statistic** to test $H_o$ where the average blood pressure of both groups are equivalent.
 
-<center>
-$T = \frac{\hat{\mu}_t - \hat{\mu}_c}{s \sqrt{\frac{1}{n_t} + \frac{1}{n_c}}}$
-</center>
+<center>$T = \frac{\hat{\mu}_t - \hat{\mu}_c}{s \sqrt{\frac{1}{n_t} + \frac{1}{n_c}}}$</center>
 
-* $\hat{\mu}_t/\hat{\mu}_c$$ Are the averages of the blood pressure measurements for both groups.
-* $s$ is an estimator of the pooled standarad deviation of the two sample groups.
+-   $\hat{\mu}_t/\hat{\mu}_c$\$ Are the averages of the blood pressure measurements for both groups.
+-   $s$ is an estimator of the pooled standarad deviation of the two sample groups.
 
 > A large (absolute) value of $T$ provides evidence against the null hypothesis.
 
 #### Compute the p-value
+
 Next we need to determine how much evidence against $H_o$ is provided by a large test statistic.
 
 > A p-value is the probability of observing a test statistic equal to or more extreme than than the observed statistic under the assumption that the $H_o$ is true.
 
-  * A small p-value provides evidence against $H_o$.
+-   A small p-value provides evidence against $H_o$.
 
-**Example: $T = 2.33$**
+**Example:** $T = 2.33$
 
-* Under $H_o$, distribution follows $N(0,1)$ distribution.
-  * A normal distribution with mean of 0 and variance of 1.
-  * Majority (98%) of $T$ values fall between $-2.33$ and $2.33$.
-  * Expect to see our result only 2% of the time.
+-   Under $H_o$, distribution follows $N(0,1)$ distribution.
+    -   A normal distribution with mean of 0 and variance of 1.
+    -   Majority (98%) of $T$ values fall between $-2.33$ and $2.33$.
+    -   Expect to see our result only 2% of the time.
 
 Null distribution depends on:
 
-* Type of $H_o$ being tested.
-* Type of test statistic is used.
+-   Type of $H_o$ being tested.
+-   Type of test statistic is used.
 
 Most commonly-used test stats follow a well-known statistical distribution under $H_o$.
 
@@ -84,51 +88,83 @@ Often incorrectly interpreted. The CORRECT interpretation is:
 
 Converting the test statistic (An arbitrary and uninterpretable number) into a **p-value** (an easy-to-understand value between 0 and 1) **helps researchers interpret a result**.
 
-* Additional context given by p-value as we now what should be expected under $H_o$ null distribution.
+-   Additional context given by p-value as we now what should be expected under $H_o$ null distribution.
 
 #### Decide Whether to Reject the Null Hypothesis
+
 Typically, some arbitrary threshold of $<0.05$.
 
 Should never blindly adhere to a value. Also, include p-value in reporting.
 
 ### 13.1.2 Type I and Type II Errors
+
 If the $H_o$ holds, it is a true null hypothesis. Otherwise it's a false null hypothesis.
 
-| Decision | Outcome if $H_o$ is true | Outcome if $H_a$ is true |
-| --- | --- | --- |
-| Reject $H_o$ | **Type I Error** | Correct |
-| Do Not Reject $H_o$ | Correct | **Type II Error** |
+| Decision            | Outcome if $H_o$ is true | Outcome if $H_a$ is true |
+|---------------------|--------------------------|--------------------------|
+| Reject $H_o$        | **Type I Error**         | Correct                  |
+| Do Not Reject $H_o$ | Correct                  | **Type II Error**        |
 
 #### Type 1 Error
 
-* Rate of error is the probability of incorrectly rejecting $H_o$.
-* Also called FPR.
+-   Rate of error is the probability of incorrectly rejecting $H_o$.
+-   Also called FPR.
 
 > Considered worst type of error as declare finding that is not correct.
 
 #### Type 2 Error
 
-* Rate of error is the probability of incorrectly not rejecting $H_o$.
-* Also called FNR.
+-   Rate of error is the probability of incorrectly not rejecting $H_o$.
+-   Also called FNR.
 
-> Its **inverse (1 - FNR)** is  defined as the **power of a hypothesis test**. Correctly reject $H_o$ given $H_a$ holds.
+> Its **inverse (1 - FNR)** is defined as the **power of a hypothesis test**. Correctly reject $H_o$ given $H_a$ holds.
 
 #### Trade-Offs
 
-* Make Type I error small:
-  * By:
-    * Reject $H_o$ if we are quite sure that it doesn't hold.
-  * Downside:
-    * Increase in Type II error.
-* Make Type II error small:
-  * By:
-    * Reject $H_o$ with even modest amount of evidence.
-  * Downside:
-    * Increase in Type I error.
-
+-   Make Type I error small:
+    -   By:
+        -   Reject $H_o$ if we are quite sure that it doesn't hold.
+    -   Downside:
+        -   Increase in Type II error.
+-   Make Type II error small:
+    -   By:
+        -   Reject $H_o$ with even modest amount of evidence.
+    -   Downside:
+        -   Increase in Type I error.
 
 There is a direct correspondence between the p-value threshold that causes us to reject $H_o$ and the Type I error rate.
 
 > By only rejecting $H_o$ when the p-value is below $\alpha$, ensure that Type I error rate will be less than or equal to $\alpha$.
 
 ## 13.2 the Challenge of Multiple Testing
+
+<center>
+![](https://www.explainxkcd.com/wiki/images/3/3f/significant.png){height="33%"}
+</center>
+
+How do we reject all null hypotheses for which the corresponding p-value falls below some threshold?
+
+**Example: Flip Fair Coins**
+
+* $n = 1024$ coins.
+* $x = 10$ flips per coin.
+* What is the change that any single coin comes up *all tails*?
+  * $\frac{1}{2 ^ {10}} = \frac{1}{1,024} \approx 0.001$
+  * Standard hypothesis test for the $H_o$ (**This particular coin is fair.**) gives a p-value below **0.002**.
+    * Report both possibilities: 10 tails or 10 heads.
+
+> When testing a large number of null hypotheses, we are bound to get some very small p-values by chance.
+
+Another example. If FPR or $\alpha = 0.01$:
+
+* Test $m$ null hypotheses where $m = 10,000$.
+* $NumberNullHypothesesRejected = 0.01 * m = 100$
+* 100 $H_o$ rejected by chance!
+
+## 13.3 The Family-Wise Error Rate
+
+### 13.3.1 What is the Family-Wise Error Rate?
+Also called FWER.
+
+* When setting of $m$ null hypotheses.
+* Probability of making at least one Type I error among $m$ $H_o$s.
