@@ -168,3 +168,38 @@ Also called FWER.
 
 * When setting of $m$ null hypotheses.
 * Probability of making at least one Type I error among $m$ $H_o$s.
+
+Possibilities when performing $m$ hypothesis tests.
+
+| Action | $H_o$ is True | $H_o$ is False | Total |
+|-|-|-|-|
+|Reject $H_o$|$V$|$S$|$R$|
+|Do Not Reject $H_o$|$U$|$W$|$m-R$|
+
+* $V$ = Number of Type I Errors
+* $S$ = Number of true positives
+* $U$ = Number of true negatives
+* $W$ = Number of Type II Errors
+
+Family wise error rate is given by:
+
+<center>
+$FWER = Pr(V >= 1)$
+</center>
+
+When accounting for level $\alpha$, FPR results in the following FWER.
+
+<center>
+$FWER(\alpha) = 1-Pr(V=0)$
+
+* $Pr(V=0)$ is the probability we do not falsely reject any null hypotheses.
+* Also, $Pr(\cap^m_{j=1}\{$do not falsely reject $H_oj$ $\})$
+</center>
+
+Each test of the $m$ tests are independent therefore:
+
+* $FWER(\alpha) = 1 - (1-\alpha)^m$
+* At an $\alpha = 0.05$, the $FWER = 1 - (1-0.05)^{100} = 0.994$
+  * **A 99.4% chance of at least one FP!**
+
+> Only for very small like $\alpha = 0.001$, can we ensure a small FWER for a moderate number of hypothesis tests. More evidence in reject a $H_o$ is required to control FWER than FPR for a single test.
