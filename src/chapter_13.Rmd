@@ -192,7 +192,7 @@ When accounting for level $\alpha$, FPR results in the following FWER.
 <center>
 $FWER(\alpha) = 1-Pr(V=0)$
 
-* $Pr(V=0)$ is the probability we do not falsely reject any null hypotheses.
+* $Pr(V=0)$ is the probability we do not falsely reject **any** null hypotheses.
 * Also, $Pr(\cap^m_{j=1}\{$do not falsely reject $H_oj$ $\})$
 </center>
 
@@ -203,3 +203,46 @@ Each test of the $m$ tests are independent therefore:
   * **A 99.4% chance of at least one FP!**
 
 > Only for very small like $\alpha = 0.001$, can we ensure a small FWER for a moderate number of hypothesis tests. More evidence in reject a $H_o$ is required to control FWER than FPR for a single test.
+
+### 13.3.2 Approaches to Control the Family-Wise Error Rate
+
+Using the `Fund` data set, we'll test general-purpose as well as more specialized methods for controlling the FWER.
+
+* Records the monthy percentage excess returns for 2,000 fund managers.
+* $n=50$ months
+
+|Manager|Mean, $\overline{x}$|Standard Deviation, $s$|t-statistic|p-value|
+|-|-|-|-|-|
+|One|3.0|7.4|2.86|0.006|
+|Two|-0.1| 6.9| -0.10| 0.918|
+|Three |2.8| 7.5| 2.62| 0.012|
+|Four |0.5| 6.7| 0.53| 0.601|
+|Five |0.3| 6.8| 0.31| 0.756|
+
+#### The Bonferroni Method
+
+Event of Type I Error ($A_j$) for $jth$ null hypothesis among $m$ null hypotheses.
+
+* $j = 1, ..., m$
+* $FWER(\alpha) = Pr($falsely reject **at least** one null hypothesis$)$
+  * $\le \sum_{j=1}^{m} Pr(A_j)$
+  * $Pr(A \cup B) \le Pr(A) + Pr(B)$ (regardless if independent)
+
+With the Bonferroni method:
+
+* Set the threshold for rejecting each hypothesis test to $\alpha / m$ so that $Pr(A_j) \le \alpha / m$ controlling the FPR at $\alpha$.
+
+> If $\alpha = 0.1$ for $m=100$ null hypotheses, each $H_o$ can only be rejected if its p-value is below $0.001 = 0.1 / 100$
+
+For the example above:
+
+* $H_o$ = The mean return of a manager is 0.
+* $H_a$ = The mean return of a manager is greater than 0.
+* Without Bonferroni, reject $H_{oj}$ for 1st and 3rd manager incorrectly.
+  * $FWER \ge 0.05$
+* With Bonferroni:
+  * $\alpha/m = 0.05 / 5 = 0.01$
+  * Only reject $H_{o1}$.
+
+##### Downside
+Very conservative approach to FWER control. Reject fewer null hypotheses and therefore increase Type II errors.
