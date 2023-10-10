@@ -344,3 +344,31 @@ Using Scheffe's method, we can control FPR error at level $\alpha$ by computing 
 
 - Can also use the same $\alpha_S$ for other combination of the same number of groupings.
   - ex. (M1 + M4) vs. (M2 + M3 + M5)
+
+### 13.3.3 Trade-Off Between the FWER and Power
+
+As the number of $m$ null hypotheses increases, power decreases at a given FWER.
+
+- Remember, FWER at a given level $\alpha$ means that we are unlikely ($\le\alpha$) to reject **any true** $H_o$s (FPR)
+- At large $m$, this limits rejection to very few $H_o$ to guarantee above statement.
+
+## 13.4 The False Discovery Rate
+
+### 13.4.1 Intuition for the False Discovery Rate
+Using FWER to prevent FPs is too stringent when $m$ is large.
+
+An alternative might be the ratio of FPs ($V$) to total Ps ($V + S = R$) should be low.
+
+- This is the false discovery proportion (FDP).
+- But, ratio cannot be controlled as no way to be certain which hypotheses are true and which are false.
+  - Similar to FWER.
+
+Instead, control the **false discovery rate (FDR)**.
+
+<center>
+$FDR = E(FDP) = E(V/R)$
+</center>
+
+- FDR at level $q = 20\%$
+  - Rejects as many $H_o$s as possible.
+  - Guarantee that no more than $20\%$ of these are FPs, on average.
