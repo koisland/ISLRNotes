@@ -357,9 +357,10 @@ As the number of $m$ null hypotheses increases, power decreases at a given FWER.
 ### 13.4.1 Intuition for the False Discovery Rate
 Using FWER to prevent FPs is too stringent when $m$ is large.
 
-An alternative might be the ratio of FPs ($V$) to total Ps ($V + S = R$) should be low.
+An alternative might be the ratio of FPs ($V$) to total Ps ($V + S = R$).
 
 - This is the false discovery proportion (FDP).
+- Should be low.
 - But, ratio cannot be controlled as no way to be certain which hypotheses are true and which are false.
   - Similar to FWER.
 
@@ -372,3 +373,17 @@ $FDR = E(FDP) = E(V/R)$
 - FDR at level $q = 20\%$
   - Rejects as many $H_o$s as possible.
   - Guarantee that no more than $20\%$ of these are FPs, on average.
+
+#### Applications
+
+> For exploratory, rather than confirmatory purposes.
+
+- Example:
+  - Genomic researcher will sequence the genomes of individuals w/ or w/o a medication condition and for each of 20,000 genes, test whether sequence variants in that gene are associated with the medical condition of interest.
+  - **Essentially performing $m = 20,000$ hypothesis tests.**
+  - Goal is to see whether there is **an association between a gene and a disease** with further plans to investigate any genes for which there is evidence.
+  - FWER not appropriate as we don't mind if a few FPs.
+  - Need correction as cannot investigate all genes with p-values less than 0.05 (1000 would be considered significant by chance.)
+    - With FDR, no more than 20% of genes studied are FPS.
+
+> No standard accepted threshold for FDR control; it's context/data dependent.
