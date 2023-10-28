@@ -247,7 +247,7 @@ For the example above:
 
 Very conservative approach to FWER control. Reject fewer null hypotheses and therefore increase Type II errors.
 
-#### Holm's Step-Down Procedure
+#### Holm's Step-Down Procedure {#holm}
 
 Alternative to Bonferonni method:
 
@@ -387,3 +387,166 @@ $FDR = E(FDP) = E(V/R)$
     - With FDR, no more than 20% of genes studied are FPS.
 
 > No standard accepted threshold for FDR control; it's context/data dependent.
+
+### 13.4.2 The Benjamini-Hochberg Procedure
+Procedure to reject $H_o$s while controlling $FDR \le q$
+
+- Connect p-values from $m$ null hypotheses to desired FDR value, $q$.
+
+##### Algorithm
+
+1. Specify $q$ level to control FDR.
+
+2. Compute p-values for the $m$ null hypotheses.
+
+3. Sort the p-values in ascending order.
+
+4. Define index $L = max \{ j : p_{(j)} < qj / m\}$.
+
+5. Reject all null hypotheses $H_{oj}$ for which $p_j \le p_{(L)}$
+
+```{r}
+# Check if p-value is valid for Benjamini-Hochberg procedure for controlling FDR
+# @param `p_val` - (numeric) p-value
+# @param `m`     - (numeric) Number of null hypotheses
+# @param `j`     - (numeric) p-value position among `m`
+# @param `alpha` - (numeric) Level
+#
+# @return        - (bool) Reject null?
+benjamini_hochberg_procedure <- function(p_val, m, j, alpha = 0.05) {
+  return(p_val < (alpha * (j / m)))
+}
+```
+
+```{r}
+for (i in order(p_vals)) {
+  res <- benjamini_hochberg_procedure(
+    p_vals[i],
+    length(p_vals),
+    i,
+    alpha = 0.05
+  )
+  switch(toString(i),
+    # Only 1st and 3rd manager are rejected.
+    "1" = stopifnot(isTRUE(res)),
+    "3" = stopifnot(isTRUE(res)),
+    stopifnot(!isTRUE(res))
+  )
+}
+```
+
+#### Summary
+As long as $m$ p-values are independent, BH ensures that $FDR \le q$.
+
+> On average, no more than a fraction $q$ fo the rejected $H_o$ are FPs.
+
+  - Doesn't matter how many $H_o$ are true.
+  - Doesn't matter what distribution of p-values for $H_o$ that are false.
+  - Easy way to determine which of $m$ null hypotheses to reject in order to control FDR at $q$.
+  - Data dependent; need to see data first to set threshold.
+    - Similar to [Holm](#holm) procedure
+
+
+## 13.5 A Re-Sampling Approach to p-Values and False Discovery Rates
+
+Typically, we're intersted in a $H_o$ using a test statistic $T$ which has a distribution under $H_o$.
+
+  - Called a theoretical null distribution.
+    - ex. normal distribution, t-distribution, $\chi^2$-distribution, etc.
+    - For most $H_o$, a null distribution is available.
+
+However, may be unavailable if $H_o$ or test statistic $T$ is unusual.
+
+- May also need to avoid because an assumption is false or sample size is small.
+- In this scenario, need framework for performing inference.
+  - Takes advantage of fast computers to approximate null distribution of $T$ and obtain a p-value.
+
+
+### 13.5.1 A Re-Sampling Approach to the p-Value
+
+Want to test whether the mean of a random variable $X$ equals the mean of a random variable $Y$.
+
+Given $n_X$ independent observations from $X$ and $n_Y$ independent observations from $Y$, two-sample t-statistic is:
+
+<center>
+$T = \frac{\hat\mu_X - \hat\mu_Y}{s \sqrt{\frac{1}{n_X} + \frac{1}{n_Y}}}$
+</center>
+
+> If $n_X$ and $n_Y$ are large, then $T$ appoximately follows N(0,1) distribution.
+> If $n_X$ and $n_Y$ are small, w/o strong assumption about distribution of $X$ and $Y$, don't known null distribution of $T$.
+
+Can approximate the null distribution of $T$ using a re-sampling approach or a permutation approach.
+
+> TODO: Skipping for now.
+
+## 13.6 Lab: Multiple Testing
+
+### 13.6.1 Review of Hypothesis Tests
+Initialize some data with:
+
+- 100 variables (cols) each with 10 observations (rows).
+
+```{r}
+set.seed(6)
+num_vars <- 100
+num_observations <- 10
+
+x <- matrix(
+  rnorm(num_observations * num_vars),
+  nrow = num_observations,
+  ncol = num_vars
+)
+```
+
+Modify the first 50 variables.
+
+- First 50 variables, have mean 0.5 and variance 1.
+- The rest have mean 0 and variance 1.
+
+```{r}
+mean_adj <- 0.5
+x[, 1:50] <- x[, 1:50] + mean_adj
+```
+
+Use `t.test()` to perform one-sample or two-sample t-test.
+
+1. $H_o: \mu_1 = 0$
+    - First variable has mean zero.
+
+```{r}
+# First variable (col)
+t.test(x[, 1], mu = 0)
+```
+
+Fail to reject $H_o$ at level $\alpha = 0.05$.
+
+- $\mu_1 = 0.5$ so $H_o$ is false.
+- This is a FN (Type II error) as we fail to reject $H_o$ when it is false.
+
+Test $H_{0j}: \mu_j = 0$ for $j = 1,...100$
+```{r}
+mu <- 0.05
+p_vals <- rep(0, num_vars)
+
+for (i in 1:num_vars) {
+  t_test_res <- t.test(x[, i], mu = 0)
+  p_vals[i] <- t_test_res$p.value
+}
+
+decision <- rep("Do not reject H0", num_vars)
+decision[p_vals <= mu] <- "Reject H0"
+```
+
+Construct table to better visualize:
+```{r}
+table(
+  decision,
+  c(rep("H0 is False", 50), rep("H0 is True", 50))
+)
+```
+
+- FN = 40
+    - Simulation has a weak signal as ratio of mean to stdev is small $(0.5 / 1.0) = 0.5$
+- FP = 3
+
+### 13.6.2 The Family-Wise Error Rate
