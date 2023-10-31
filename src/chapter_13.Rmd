@@ -550,3 +550,134 @@ table(
 - FP = 3
 
 ### 13.6.2 The Family-Wise Error Rate
+```{r}
+m <- 1:500
+# Calculated FWER
+# * num_htests - m, number of hypothesis tests.
+# * alpha
+fwe <- function(alpha, num_htests) {
+  1 - (1 - alpha)^num_htests
+}
+```
+
+Calculate FWER for multiple alpha levels:
+* Shows that unless $m$ is large or $\alpha$ is small, FWER exceeds 0.05.
+* Lowering $\alpha$ increases FNs. Low power.
+
+```{r}
+fwe1 <- fwe(0.05, m)
+fwe2 <- fwe(0.01, m)
+fwe3 <- fwe(0.001, m)
+```
+
+```{r}
+par(mfrow = c(1, 1))
+plot(
+  m,
+  fwe1,
+  type = "l",
+  log = "x",
+  ylim = c(0, 1),
+  col = 2,
+  ylab = "Family - Wise Error Rate",
+  xlab = "Number of Hypotheses"
+)
+title("Number of Hypotheses on FWER")
+lines(m, fwe2, col = 4)
+lines(m, fwe3, col = 3)
+abline(h = 0.05, lty = 2)
+legend(
+  "topleft",
+  legend = c(0.05, 0.01, 0.001),
+  col = c(2, 4, 3),
+  pch = rep("*", 3),
+  title = "Alphas"
+)
+```
+
+Using `Fund` dataset, test $H_o$ that $jth$ fund manager's mean return is zero.
+```{r}
+# Load dataset
+library(ISLR2)
+fund_mini <- Fund[, 1:5]
+# Run one-sample t-test
+t.test(fund_mini[, 1], mu = 0)
+
+# Store values in numeric array.
+fund_pvalues <- rep(0, 5)
+for (i in 1:5) {
+  fund_pvalues[i] <- t.test(fund_mini[, i], mu = 0)$p.value
+}
+print("P-values before Error Correction Adjustment")
+fund_pvalues
+```
+
+```{r include=FALSE}
+print_reject_managers <- function(p_values, alpha = 0.05) {
+  sprintf(
+    "We can reject Manager %d, at alpha of %f",
+    which(p_values < alpha),
+    alpha
+  )
+}
+```
+Adjust for multiple hypothesis testing, using `p.adjust()`.
+```{r}
+fund_pvalues_bonf <- p.adjust(fund_pvalues, method = "bonferroni")
+fund_pvalues_bonf
+# Wrapper on which and sprintf
+print_reject_managers(fund_pvalues_bonf)
+```
+```{r}
+# Under the hood, p.adjust does this. pmin calculates min for multiple arrays.
+# The 1 arg is the max value allowed.
+pmin(fund_pvalues * 5, 1)
+```
+> With our new p-values, if value for a given test is $\le \alpha$, we can reject it while maintaining a FWER of no more than $\alpha$.
+
+```{r}
+fund_pvalues_holm <- p.adjust(fund_pvalues, method = "holm")
+fund_pvalues_holm
+print_reject_managers(fund_pvalues_holm)
+```
+
+Manager One does well whereas Manager Two does not. Is there a difference in performance between the two?
+
+- Appears like there is a significant difference between the two.
+
+```{r}
+apply(fund_mini, 2, mean)
+```
+
+```{r}
+paired_ttest_manager1_2 <- t.test(
+  fund_mini[, 1],
+  fund_mini[, 2],
+  paired = TRUE
+)
+paired_ttest_manager1_2
+```
+
+But, because we looked at data before running test, performed 10 hypothesis tests. Need to use Tukey's method (`TukeyHSD()`) to adjust for multiple testing.
+
+- Requires output of ANOVA regression model
+    - Response: Monthly excess returns achieved by each manager
+    - Predictor: Manager which each return corresponds.
+- No longer significant difference.
+
+```{r}
+returns <- as.vector(as.matrix(fund_mini))
+managers <- rep(
+  # managers
+  c("1", "2", "3", "4", "5"),
+  rep(50, 5)
+)
+# ANOVA regression model.
+a1 <- aov(returns ~ managers)
+
+tukey <- TukeyHSD(x = a1)
+tukey
+```
+```{r}
+plot(tukey)
+```
