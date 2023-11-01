@@ -681,3 +681,79 @@ tukey
 ```{r}
 plot(tukey)
 ```
+
+### 13.6.3 The False Discovery Rate
+Perform hypothesis tests (one-sample t-test) for all 2,000 fund managers in dataset.
+
+- Too many managers to try and control the FWER so control FDR instead.
+```{r}
+num_fund_managers <- length(Fund)
+fund_pvalues_fdr <- rep(0, num_fund_managers)
+for (i in 1:num_fund_managers) {
+  fund_pvalues_fdr[i] <- t.test(Fund[, i], mu = 0)$p.value
+}
+```
+
+
+Q-values are output and are the smallest FDR threshold at which we could reject a particular $H_o$.
+
+- ex. $q = 0.1$
+    - Reject corresponding $H_o$ at an FDR of 10% or greater. Cannot reject the $H_o$ at an FDR below 10%.
+
+```{r}
+q_values_bh <- p.adjust(fund_pvalues_fdr, method = "BH")
+q_values_bh[1:10]
+```
+
+```{r}
+q_value <- 0.1
+sum(q_values_bh <= q_value)
+```
+
+The number of fund managers with q-value below 0.1.
+
+> 146 of fund managers beat the market at an FDR of 10%. Only 15 (10% of 146) are likely to be false discoveries.
+
+```{r}
+sum(fund_pvalues <= (0.1 / 2000))
+```
+
+> With Bonferroni's method, no $H_o$ is rejected.
+
+Reimplemented in book.
+
+```{r}
+sorted_pvals <- sort(fund_pvalues)
+m <- length(fund_pvalues)
+q <- 0.1
+check_pvals_idxs <- which(sorted_pvals < q * (1:m) / m)
+# Index finding index to reject other p-vals.
+if (length(check_pvals_idxs) > 0) {
+  rej_pvals_idxs <- 1:max(check_pvals_idxs)
+} else {
+  rej_pvals_idxs <- numeric(0)
+}
+```
+
+```{r}
+plot(
+  sorted_pvals,
+  log = "xy",
+  ylim = c(4e-6, 1),
+  ylab = "P-Value",
+  xlab = "Index",
+  main = ""
+)
+points(rej_pvals_idxs, sorted_pvals[rej_pvals_idxs], col = 4)
+abline(a = 0, b = (q / m), col = 2, untf = TRUE)
+abline(h = 0.1 / 2000, col = 3)
+```
+
+## 13.7 Exercises
+1.
+2.
+3.
+4.
+5.
+6.
+7.
