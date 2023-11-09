@@ -561,6 +561,7 @@ fwe <- function(alpha, num_htests) {
 ```
 
 Calculate FWER for multiple alpha levels:
+
 * Shows that unless $m$ is large or $\alpha$ is small, FWER exceeds 0.05.
 * Lowering $\alpha$ increases FNs. Low power.
 
@@ -750,10 +751,74 @@ abline(h = 0.1 / 2000, col = 3)
 ```
 
 ## 13.7 Exercises
-1.
-2.
-3.
-4.
+1. Suppose we test m null hypotheses, all of which are true. We control the Type I error for each null hypothesis at level α. For each subproblem, justify your answer.
+    a. In total, how many Type I errors do we expect to make?
+        - $m * \alpha$
+        - ex. 20 $H_o$ at level $\alpha = 0.05$ yields 1 $H_o$ falsely rejected.
+    b. Suppose that the $m$ tests that we perform are independent. What is the family-wise error rate associated with these $m$ tests?
+        - $1 - (1 - \alpha) ^ m$
+    c. Suppose that $m = 2$, and that the p-values for the two tests are positively correlated, so that if one is small then the other will tend to be small as well, and if one is ... How does the FWER associated with these $m=2$ tests qualitatively compare tho the answer in (b) with $m=2$.
+        - No longer independent.
+        - Greater FWER.
+    d. Suppose again that m = 2, but that now the p-values for the two tests are negatively correlated, so that if one is large then the other will tend to be small. How does the family-wise error rate associated with these m = 2 tests qualitatively compare to the answer in (b) with m = 2?
+        - Roughly equal FWER. May result in more FNs but not more FPs.
+
+2. Suppose that we test $m$ hypotheses, and control the Type I error for each hypothesis at level $\alpha$. Assume that all $m$ p-values are independent, and that all null hypotheses are true.
+    a. Let the random variable $A_j$ equal 1 if the jth null hypothesis is rejected, and 0 otherwise. What is the distribution of $A_j$?
+        - Bernoulli distribution
+    b. What is the distribution of $\sum^m_{j=1} A_j$?
+        - Binomial distribution.
+    c. What is the standard deviation of the number of Type I errors that we will make?
+        - $\sqrt{mp(1-p)}$ where p is probability of Type I error.
+
+3. Suppose that we test $m$ null hypotheses, and control the Type I error fo the jth null hypothesis at level $\alpha_j$, for $j=1, ..., m$. Argue that the FWER is no greater than $\sum^m_{j=1} \alpha_j$
+    - From Section 13.3.2 on bonferroni correction.
+    - FWER is probability of at least one FP for jth null hypothesis.
+    - $FWER(\alpha) = Pr(A_j) \le \alpha \le \sum^m_{j=1} \alpha_j$
+4. Suppose we test $m=10$ hypotheses, and obtain the p-values shown in Table 13.4.
+
+```{r}
+p_vals <- c(
+  0.0011, 0.031, 0.017, 0.32, 0.11,
+  0.90, 0.07, 0.006, 0.004, 0.0009
+)
+m <- length(p_vals)
+names(p_vals) <- paste0("H_", seq(10))
+p_vals
+```
+
+  a. Suppose that we wish to control the Type I error for each null hypothesis at level $α=0.05$. Which null hypotheses will we reject?
+
+```{r}
+alpha <- 0.05
+names(which(p_vals < alpha))
+```
+
+  b. Now suppose that we wish to control the FWER at level $\alpha = 0.05$. Which null hypotheses will we reject?
+
+```{r}
+names(which(p.adjust(p_vals, method = "bonferroni") < alpha))
+```
+
+  c. Now suppose that we wish to control the FDR at level $q=0.05$. Which null hypotheses will we reject?
+
+```{r}
+q_value <- 0.05
+# Allow 5% of possible rejected nulls to be false.
+names(which(p.adjust(p_vals, method = "BH") < q_value))
+```
+
+  d. See (c). Now with $q=0.02$.
+
+```{r}
+q_value <- 0.02
+# Allow 2% of possible rejected nulls to be false. More stringent
+names(which(p.adjust(p_vals, method = "BH") < q_value))
+```
+
+  e. Of the null hypotheses rejected at FDR level $q=0.2$, approximately how many are false positives?
+    - 20% percent. It's the definition of the q-value.
+
 5.
 6.
 7.
