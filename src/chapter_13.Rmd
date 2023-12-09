@@ -819,6 +819,184 @@ names(which(p.adjust(p_vals, method = "BH") < q_value))
   e. Of the null hypotheses rejected at FDR level $q=0.2$, approximately how many are false positives?
     - 20% percent. It's the definition of the q-value.
 
-5.
-6.
-7.
+5. For this problem, you will make up p-values that lead to a certain number of rejections using the Bonferroni and Holm procedures.
+    - Give an example of five p-values for which both Bonferroni's method and Holm's method reject exactly one null hypothesis when controlling the FWER at level 0.1.
+
+    ```{r}
+alpha <- 0.1
+p_vals <- c(0.03, 0.1, 0.3, 0.019, 0.11)
+bonf_adj_p_vals <- p.adjust(p_vals, method = "bonferroni")
+holm_adj_p_vals <- p.adjust(p_vals, method = "holm")
+# Test only 1 expected for each.
+stopifnot(
+  length(which(bonf_adj_p_vals < alpha)) == 1
+)
+stopifnot(
+  length(which(holm_adj_p_vals < alpha)) == 1
+)
+    ```
+
+    - Now give an example of five p-values for which Bonferroni rejects one null hypothesis and Holm rejects more than one null hypothesis at level 0.1.
+
+    ```{r}
+alpha <- 0.1
+p_vals <- c(0.021, 0.1, 0.3, 0.019, 0.11)
+# This is alpha / m
+bonf_adj_p_vals <- p.adjust(p_vals, method = "bonferroni")
+# This is alpha / (m + 1 - j)
+holm_adj_p_vals <- p.adjust(p_vals, method = "holm")
+# Test.
+stopifnot(
+  length(which(bonf_adj_p_vals < alpha)) == 1
+)
+stopifnot(
+  length(which(holm_adj_p_vals < alpha)) == 2
+)
+    ```
+
+6. For each of the three panels in Figure 13.3, answer the following questions:
+    a. How many FPs, FNs, TPs, TNs, Type I errors, and Type II errors result from applying the Bonferroni procedure to control the FWER at level $\alpha = 0.05$?
+        - | FP | FN | TP | TN | Type I error | Type II error |
+          | - | - | - | - | - | - |
+          | 0 | 7 | 17 | 6 | 0 | 7 |
+
+    b. All of above for the Holm procedure at the same level?
+        - | FP | FN | TP | TN | Type I error | Type II error |
+          | - | - | - | - | - | - |
+          | 0 | 1 | 23 | 6 | 0 | 1 |
+
+    c. What is the FDR associated with using the Bonferroni procedure to control the FWER at level $\alpha = 0.05$?
+        - $FDR = FP / (FP + TP) = 0 / (0 + 17) = 0$
+    d. FDR for the Holm procedure at the same level?
+        - $FDR = FP / (FP + TP) = 0 / (0 + 23) = 0$
+    e. How would the answers to (a) and (c) change if we instead used the Bonferroni procedure to control the FWER at level $\alpha = 0.001$?
+    - (a) would have more FNs and fewer TPs. Type II error increases.
+    - (c) would remain unchanged as FPs would never increase with a stricter alpha. All p-values are false below the adjusted lines.
+
+7. This problem makes use of the `Carseats` dataset in the `ISLR2` package.
+    a. For each quantitative variable in the dataset besides `Sales`, fit a linear model to predict `Sales` using that var. Report the p-values associated with the coefficients for the variables. That is, for each model of the form $Y = \beta_0 + \beta_1X + \epsilon$
+
+    ```{r}
+library(ISLR2)
+
+carseats_data <- Carseats
+resp_var <- "Sales"
+p_vals <- c()
+for (pred_var in names(carseats_data)) {
+  if (pred_var == resp_var) {
+    next
+  }
+
+  fit <- glm(
+    sprintf("%s ~ %s", resp_var, pred_var),
+    data = carseats_data
+  )
+  # p-val of intercept: null hypothesis
+  # the mean of Sales is zero when controlling for pred_var can be rejected
+
+  # nolint start
+  # https://www.reddit.com/r/Rlanguage/comments/tzv1m3/how_to_interpret_the_pvalue_of_the_intercept_in_a/i41jv32/
+  # nolint end
+  pred_p_vals <- coef(summary(fit))[, "Pr(>|t|)"]
+  pred_p_vals <- pred_p_vals[!names(pred_p_vals) %in% c("(Intercept)")]
+  p_vals <- append(p_vals, pred_p_vals)
+}
+print(p_vals)
+    ```
+
+    b. Suppose we control the Type 1 error at level $\alpha = 0.05$ for the p-values in (a). Which null hypotheses do we reject?
+
+    ```{r}
+which(p_vals < 0.05)
+    ```
+
+    b. Suppose we control the FWER at level $0.05$ for the p-values in (a). Which null hypotheses do we reject?
+
+    ```{r}
+which(p.adjust(p_vals, method = "holm") < 0.05)
+    ```
+
+    c. Finally, suppose we control the FDR at level 0.2 for the p-values. Which null hypotheses do we reject?
+
+    ```{r}
+which(p.adjust(p_vals, method = "BH") < 0.2)
+    ```
+
+8. Simulated returns data from $m$ fund managers. $n$ is number of months.
+
+    ```{r}
+set.seed(1)
+n <- 20
+m <- 100
+# pop mean is 0.
+# All m H_o are true.
+x <- matrix(rnorm(n * m), ncol = m)
+    ```
+
+    a. Conduct a one-sample t-test for each fund manager, and plot a histogram of the p-values obtained.
+
+    ```{r}
+p_vals <- c()
+for (i in seq(m)) {
+  ttest <- t.test(x[, i], mu = 0)
+  p_vals[i] <- ttest$p.value
+}
+hist(p_vals)
+    ```
+
+    b. If we control Type I error for each null hypothesis at level α = 0.05, then how many null hypotheses do we reject?
+
+    ```{r}
+which(p_vals < 0.05)
+    ```
+
+    c. If we control the FWER at level 0.05, then how many null hypotheses do we reject?
+
+    ```{r}
+which(p.adjust(p_vals, method = "holm") < 0.05)
+    ```
+
+    d. If we control the FDR at level 0.05, then how many null hypotheses do we reject?
+
+    ```{r}
+which(p.adjust(p_vals, method = "BH") < 0.05)
+    ```
+
+    e. Now suppose we “cherry-pick” the 10 fund managers who perform the best in our data. If we control the FWER for just these 10 fund managers at level 0.05, then how many null hypotheses do we reject? If we control the FDR for just these 10 fund managers at level 0.05, then how many null hypotheses do we reject?
+
+    ```{r}
+library(dplyr)
+
+# Get number of columns.
+num_cols <- dim(x)[2]
+# Access idxs of top 10 elems in sorted vec
+get_top_10_cols <- function(sort_obj) tail(sort_obj$ix, 10)
+# Calculate mean to get 10 fund managers who perform best.
+top_10_cols <- seq(num_cols) %>%
+  sapply(function(col_idx) mean(x[, col_idx])) %>%
+  sort(index.return = TRUE) %>%
+  get_top_10_cols()
+
+# Store pvalues and manager idx from generated data, X.
+p_vals <- list(ix = c(), pvals = c())
+for (i in seq(10)) {
+  col_idx <- top_10_cols[i]
+  # Different from 0?
+  ttest <- t.test(x[, col_idx], mu = 0)
+  p_vals$pvals[i] <- ttest$p.value
+  p_vals$ix[i] <- col_idx
+}
+p_vals
+    ```
+
+    ```{r}
+length(which(p.adjust(p_vals$pvals, method = "holm") < 0.05))
+    ```
+
+    ```{r}
+length(which(p.adjust(p_vals$pvals, method = "BH") < 0.05))
+    ```
+
+    f. Explain why the analysis in (e) is misleading. Hint: The standard approaches for controlling the FWER and FDR assume that all tested null hypotheses are adjusted for multiplicity, and that no “cherry-picking” of the smallest p-values has occurred. What goes wrong if we cherry-pick?
+
+      * Looked at all values prior to testing. Looking at combinations 100 choose 10. p-hacking. Need to use Tukey's method to correct.
